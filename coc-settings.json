@@ -4,6 +4,9 @@
     "--query-driver=/bin/g++",
     "--background-index",
   ],
+  "clangd.compilationDatabaseCandidates": [
+	  "./", "../HR", "../Zulu", "../Bacon"
+  ],
   "clangd.fallbackFlags" : ["-std=c++17"],
   "inlayHint.enable": false,
   "diagnostic.enable": true,
