@@ -364,16 +364,6 @@ require('plugins/coc_setup')
 
 -- Filetype
 
---vim.api.nvim_create_autocmd('FileType', {
---  callback = function()
---    vim.cmd("set filetype=glsl");
---    vim.cmd("set syntax=glsl")
---    print("ASDF")
---  end,
---  pattern = 'conf',
---  group = vim.api.nvim_create_augroup('custom_filetypes', { clear = true }),
---})
-
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
 
@@ -383,6 +373,7 @@ local function open_my_terminal(cmd)
   vim.o.modified = false
   vim.o.bufhidden = "delete"
   vim.o.modifiable = true
+  vim.keymap.set({'n', 'v', 'i'}, 'q', ":q<CR>", {buffer = vim.api.nvim_get_current_buf()})
 end
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -398,7 +389,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "cpp",
   callback = function()
-    local cmd = "g++ % -Wall -Wextra --pedantic-errors -fsanitize=address -std=c++20"
+    local cmd = "g++ % -Wall -Wextra --pedantic-errors -fsanitize=address -std=c++20 -g"
     vim.keymap.set('n', '<F5>', function()
       open_my_terminal("echo running && "..cmd.." && ./a.out")
     end, { desc = "run file" })
@@ -408,10 +399,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.expandtab = true
   end
 })
-
-
-
--- vim.cmd("autocmd FileType haskell :nnoremap <F5> :!bash runghc-9.8 %<CR>")
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
