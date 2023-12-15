@@ -89,16 +89,16 @@ require('lazy').setup({
     },
   },
 
- -- { -- Theme inspired by Atom
- --   'navarasu/onedark.nvim',
- --   priority = 1000,
- --   config = function()
- --     vim.cmd.colorscheme 'onedark'
- --   end,
- -- },
-  { "catppuccin/nvim", name = "catppuccin" },
-  { 'kkoomen/vim-doge', run='call doge#install()'},
-  
+  -- { -- Theme inspired by Atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd.colorscheme 'onedark'
+  --   end,
+  -- },
+  { "catppuccin/nvim",      name = "catppuccin" },
+  { 'kkoomen/vim-doge',     run = 'call doge#install()' },
+
   { -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
@@ -122,7 +122,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -227,16 +227,16 @@ vim.opt.cursorline = true
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-vim.keymap.set('n', '<C-j>', '5j', {silent = true})
-vim.keymap.set('n', '<C-k>', '5k', {silent = true})
+vim.keymap.set('n', '<C-j>', '5j', { silent = true })
+vim.keymap.set('n', '<C-k>', '5k', { silent = true })
 vim.keymap.set('n', '<Leader>!', ':source%<CR>')
 
-vim.keymap.set({'n', 'v', 'i'}, '<A-h>', '<C-w>h');
-vim.keymap.set({'n', 'v', 'i'}, '<A-l>', '<C-w>l');
-vim.keymap.set({'n', 'v', 'i'}, '<A-j>', '<C-w>j');
-vim.keymap.set({'n', 'v', 'i'}, '<A-k>', '<C-w>k');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-h>', '<C-w>h');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-l>', '<C-w>l');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-j>', '<C-w>j');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-k>', '<C-w>k');
 
-vim.keymap.set({'n', 'v', 'i'}, '<M-i>', ':NvimTreeToggle<CR>', { silent = true });
+vim.keymap.set({ 'n', 'v', 'i' }, '<M-i>', ':NvimTreeToggle<CR>', { silent = true });
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -376,6 +376,42 @@ require('plugins/coc_setup')
 
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
+
+local function open_my_terminal(cmd)
+  vim.api.nvim_command("below split")
+  vim.api.nvim_command("terminal "..cmd)
+  vim.o.modified = false
+  vim.o.bufhidden = "delete"
+  vim.o.modifiable = true
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "haskell",
+  callback = function()
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("runghc-9.8 %")
+    end, { desc = "run file" })
+    vim.opt.expandtab = true
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "cpp",
+  callback = function()
+    local cmd = "g++ % -Wall -Wextra --pedantic-errors -fsanitize=address -std=c++20"
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && ./a.out")
+    end, { desc = "run file" })
+    vim.keymap.set('n', '<F17>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo done")
+    end, { desc = "run file" })
+    vim.opt.expandtab = true
+  end
+})
+
+
+
+-- vim.cmd("autocmd FileType haskell :nnoremap <F5> :!bash runghc-9.8 %<CR>")
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
