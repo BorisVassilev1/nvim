@@ -14,4 +14,5 @@ return {
 			require("nvim-tree").setup {}
 		end,
 	},
+	{"cdelledonne/vim-cmake"}
 }

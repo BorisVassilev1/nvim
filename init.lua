@@ -396,7 +396,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set('n', '<F17>', function()
       open_my_terminal("echo compiling && "..cmd.." && echo done")
     end, { desc = "run file" })
-    vim.opt.expandtab = true
   end
 })
 
