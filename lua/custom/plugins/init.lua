@@ -3,7 +3,8 @@
 --
 -- See the kickstart.nvim README for more information
 return {
-	{'neoclide/coc.nvim', branch = 'release'},
+	-- {'neoclide/coc.nvim', branch = 'release'},
+	'neovim/nvim-lspconfig',
 	'tikhomirov/vim-glsl',
 	{"nvim-tree/nvim-tree.lua",
 		version = "*",

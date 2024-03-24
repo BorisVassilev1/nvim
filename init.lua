@@ -360,12 +360,15 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnos
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
 
-require('plugins/coc_setup')
+-- require('plugins/coc_setup')
+require('plugins/lspconfig')
 
 -- Filetype
 
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
+vim.cmd("autocmd BufNewFile,BufRead *.fs :set ft=glsl")
+vim.cmd("autocmd BufNewFile,BufRead *.vs :set ft=glsl")
 
 local function open_my_terminal(cmd)
   vim.api.nvim_command("below split")
