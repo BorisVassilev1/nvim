@@ -389,7 +389,23 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "cpp",
   callback = function()
-    local cmd = "g++ % -Wall -Wextra --pedantic-errors -fsanitize=address -std=c++20 -g"
+    local cmd = "g++ \"%\" -Wall -Wextra --pedantic-errors -std=c++20 -g -fsanitize=address"
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
+    end, { desc = "compile and run file" })
+    vim.keymap.set('n', '<F17>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo done")
+    end, { desc = "compile file" })
+    vim.keymap.set('n', '<F29>', function()
+      open_my_terminal("echo running && ./a.out")
+    end, { desc = "run file" })
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "c",
+  callback = function()
+    local cmd = "cc \"%\" -Wall -Wextra --pedantic-errors -fsanitize=address -g"
     vim.keymap.set('n', '<F5>', function()
       open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
     end, { desc = "compile and run file" })
