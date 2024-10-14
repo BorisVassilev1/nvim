@@ -389,7 +389,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "cpp",
   callback = function()
-    local cmd = "g++ \"%\" -Wall -Wextra --pedantic-errors -std=c++20 -g -fsanitize=address"
+    local cmd = "g++ \"%\" -Wall -Wextra -std=c++17 -g -fsanitize=address"
     vim.keymap.set('n', '<F5>', function()
       open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
     end, { desc = "compile and run file" })
@@ -399,6 +399,9 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set('n', '<F29>', function()
       open_my_terminal("echo running && ./a.out")
     end, { desc = "run file" })
+    vim.keymap.set('n', '<F6>', function()
+      open_my_terminal("make > /dev/null && ./a.out")
+    end, {desc="make"})
   end
 })
 
