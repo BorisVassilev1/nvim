@@ -13,7 +13,7 @@
   "inlayHint.enable": false,
   "diagnostic.enable": true,
   "clangd.path": "/usr/bin/clangd",
-  "eslint.autoFixOnSave":true,
+  "eslint.autoFixOnSave": true,
   "languageserver": {
     "haskell": {
       "command": "haskell-language-server-wrapper",
