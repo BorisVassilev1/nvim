@@ -367,6 +367,8 @@ require('plugins/coc_setup')
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
 
+vim.cmd("autocmd BufNewFile,BufRead *.pl :set ft=prolog")
+
 local function open_my_terminal(cmd)
   vim.api.nvim_command("below split")
   vim.api.nvim_command("terminal "..cmd)
@@ -389,7 +391,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "cpp",
   callback = function()
-    local cmd = "g++ \"%\" -Wall -Wextra -std=c++17 -g -fsanitize=address"
+    local cmd = "g++ \"%\" -Wall -Wextra -std=c++20 -fsanitize=address -g"
     vim.keymap.set('n', '<F5>', function()
       open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
     end, { desc = "compile and run file" })
@@ -423,6 +425,36 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- vim.g.OmniSharp_server_stdio = 0
 -- vim.g.OmniSharp_highlighting = 0
+--
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "mma",
+  callback = function()
+    local cmd = "wolfram -script \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Wolfram file" })
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "prolog",
+  callback = function()
+    local cmd = "swipl \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Wolfram file" })
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    local cmd = "python3 \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Python file" })
+  end
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
