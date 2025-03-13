@@ -421,5 +421,8 @@ vim.api.nvim_create_autocmd("FileType", {
   end
 })
 
+-- vim.g.OmniSharp_server_stdio = 0
+-- vim.g.OmniSharp_highlighting = 0
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
