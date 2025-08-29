@@ -5,6 +5,7 @@
     "--background-index",
 	"--log=verbose",
   ],
+  "clangd.compilationDatabasePath": "./build",
   "clangd.compilationDatabaseCandidates": [
 	  "./", "../HR", "../Zulu", "../Bacon", "./build", "./Build"
   ],

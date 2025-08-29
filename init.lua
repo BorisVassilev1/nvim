@@ -145,8 +145,13 @@ require('lazy').setup({
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
+    run = ':TSUpdate',
     config = function()
       pcall(require('nvim-treesitter.install').update { with_sync = true })
+      require("nvim-treesitter.configs").setup({
+            ensure_installed = { "markdown", "markdown_inline", "r", "rnoweb", "yaml", "latex", "csv" },
+            highlight = { enable = true },
+        })
     end,
   },
 
@@ -237,6 +242,9 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<A-j>', '<C-w>j');
 vim.keymap.set({ 'n', 'v', 'i' }, '<A-k>', '<C-w>k');
 
 vim.keymap.set({ 'n', 'v', 'i' }, '<M-i>', ':NvimTreeToggle<CR>', { silent = true });
+
+vim.keymap.set({'n'}, '<M-T>', ':CsvViewToggle delimiter=\t display_mode=border<CR>', { silent = true });
+--vim.keymap.set({'n'}, '<Leader>csv', ':CsvViewToggle delimiter=, display_mode=border<CR>', { silent = true });
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
