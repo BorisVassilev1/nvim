@@ -375,6 +375,7 @@ require('plugins/coc_setup')
 
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
+vim.cmd("autocmd FileType scheme map <buffer> <F9> :w<CR>:exec '!racket %'<CR>")
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
