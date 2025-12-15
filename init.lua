@@ -89,15 +89,16 @@ require('lazy').setup({
     },
   },
 
---  { -- Theme inspired by Atom
---    'navarasu/onedark.nvim',
---    priority = 1000,
---    config = function()
---      vim.cmd.colorscheme 'onedark'
---    end,
---  },
-  { "catppuccin/nvim", name = "catppuccin" },
-  
+  -- { -- Theme inspired by Atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd.colorscheme 'onedark'
+  --   end,
+  -- },
+  { "catppuccin/nvim",      name = "catppuccin" },
+  { 'kkoomen/vim-doge',     run = 'call doge#install()' },
+
   { -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
@@ -115,14 +116,13 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
+    main = "ibl",
     opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
     },
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -145,8 +145,13 @@ require('lazy').setup({
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
+    run = ':TSUpdate',
     config = function()
       pcall(require('nvim-treesitter.install').update { with_sync = true })
+      require("nvim-treesitter.configs").setup({
+            ensure_installed = { "markdown", "markdown_inline", "r", "rnoweb", "yaml", "latex", "csv" },
+            highlight = { enable = true },
+        })
     end,
   },
 
@@ -227,16 +232,19 @@ vim.opt.cursorline = true
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-vim.keymap.set('n', '<C-j>', '5j', {silent = true})
-vim.keymap.set('n', '<C-k>', '5k', {silent = true})
+vim.keymap.set('n', '<C-j>', '5j', { silent = true })
+vim.keymap.set('n', '<C-k>', '5k', { silent = true })
 vim.keymap.set('n', '<Leader>!', ':source%<CR>')
 
-vim.keymap.set({'n', 'v', 'i'}, '<A-h>', '<C-w>h');
-vim.keymap.set({'n', 'v', 'i'}, '<A-l>', '<C-w>l');
-vim.keymap.set({'n', 'v', 'i'}, '<A-j>', '<C-w>j');
-vim.keymap.set({'n', 'v', 'i'}, '<A-k>', '<C-w>k');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-h>', '<C-w>h');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-l>', '<C-w>l');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-j>', '<C-w>j');
+vim.keymap.set({ 'n', 'v', 'i' }, '<A-k>', '<C-w>k');
 
-vim.keymap.set({'n', 'v', 'i'}, '<M-i>', ':NvimTreeToggle<CR>', { silent = true });
+vim.keymap.set({ 'n', 'v', 'i' }, '<M-i>', ':NvimTreeToggle<CR>', { silent = true });
+
+vim.keymap.set({'n'}, '<M-T>', ':CsvViewToggle delimiter=\t display_mode=border<CR>', { silent = true });
+--vim.keymap.set({'n'}, '<Leader>csv', ':CsvViewToggle delimiter=, display_mode=border<CR>', { silent = true });
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -286,12 +294,13 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>r', require('telescope.builtin').resume, { desc = '[R]esume Search' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'help', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -363,19 +372,98 @@ require('plugins/coc_setup')
 
 -- Filetype
 
---vim.api.nvim_create_autocmd('FileType', {
---  callback = function()
---    vim.cmd("set filetype=glsl");
---    vim.cmd("set syntax=glsl")
---    print("ASDF")
---  end,
---  pattern = 'conf',
---  group = vim.api.nvim_create_augroup('custom_filetypes', { clear = true }),
---})
-
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
 vim.cmd("autocmd FileType scheme map <buffer> <F9> :w<CR>:exec '!racket %'<CR>")
+
+vim.cmd("autocmd BufNewFile,BufRead *.pl :set ft=prolog")
+
+local function open_my_terminal(cmd)
+  vim.api.nvim_command("below split")
+  vim.api.nvim_command("terminal "..cmd)
+  vim.o.modified = false
+  vim.o.bufhidden = "delete"
+  vim.o.modifiable = true
+  vim.keymap.set({'n', 'v', 'i'}, 'q', ":q<CR>", {buffer = vim.api.nvim_get_current_buf()})
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "haskell",
+  callback = function()
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("runghc-9.8 %")
+    end, { desc = "run file" })
+    vim.opt.expandtab = true
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "cpp",
+  callback = function()
+    local cmd = "g++ \"%\" -Wall -Wextra -std=c++20 -fsanitize=address -g"
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
+    end, { desc = "compile and run file" })
+    vim.keymap.set('n', '<F17>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo done")
+    end, { desc = "compile file" })
+    vim.keymap.set('n', '<F29>', function()
+      open_my_terminal("echo running && ./a.out")
+    end, { desc = "run file" })
+    vim.keymap.set('n', '<F6>', function()
+      open_my_terminal("make > /dev/null && ./a.out")
+    end, {desc="make"})
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "c",
+  callback = function()
+    local cmd = "cc \"%\" -Wall -Wextra --pedantic-errors -fsanitize=address -g"
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
+    end, { desc = "compile and run file" })
+    vim.keymap.set('n', '<F17>', function()
+      open_my_terminal("echo compiling && "..cmd.." && echo done")
+    end, { desc = "compile file" })
+    vim.keymap.set('n', '<F29>', function()
+      open_my_terminal("echo running && ./a.out")
+    end, { desc = "run file" })
+  end
+})
+
+-- vim.g.OmniSharp_server_stdio = 0
+-- vim.g.OmniSharp_highlighting = 0
+--
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "mma",
+  callback = function()
+    local cmd = "wolfram -script \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Wolfram file" })
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "prolog",
+  callback = function()
+    local cmd = "swipl \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Wolfram file" })
+  end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    local cmd = "python3 \"%\""
+    vim.keymap.set('n', '<F5>', function()
+      open_my_terminal("echo running && "..cmd.." && echo done")
+    end, { desc = "run Python file" })
+  end
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

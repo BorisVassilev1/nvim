@@ -1,13 +1,49 @@
 {
   "clangd.arguments": [
     "--completion-style=detailed",
-    "--query-driver=/bin/g++",
+    "--query-driver=/bin/clang++",
     "--background-index",
+	"--log=verbose",
   ],
+  "clangd.compilationDatabasePath": "./build",
   "clangd.compilationDatabaseCandidates": [
-	  "./", "../HR", "../Zulu", "../Bacon"
+	  "./", "../HR", "../Zulu", "../Bacon", "./build", "./Build"
   ],
-  "clangd.fallbackFlags" : ["-std=c++17"],
+  "clangd.fallbackFlags" : [
+  ],
   "inlayHint.enable": false,
   "diagnostic.enable": true,
+  "clangd.path": "/usr/bin/clangd",
+  "eslint.autoFixOnSave": false,
+  "languageserver": {
+    "haskell": {
+      "command": "haskell-language-server-wrapper",
+      "args": [
+        "--lsp"
+      ],
+      "rootPatterns": [
+        ".stack.yaml",
+        ".hie-bios",
+        "BUILD.bazel",
+        "cabal.config",
+        "package.yaml"
+      ],
+      "filetypes": [
+        "hs",
+        "lhs",
+        "haskell"
+      ],
+      "settings": {
+        "haskell": {
+          "checkParents": "CheckOnSave",
+          "checkProject": true,
+          "maxCompletions": 40,
+          "formattingProvider": "ormolu",
+          "plugin": {
+            "stan": { "globalOn": true }
+          }
+        }
+      }
+    }
+  },
 }
