@@ -12,7 +12,11 @@ return {
 			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
-			require("nvim-tree").setup {}
+			require("nvim-tree").setup {
+				-- netrw is disabled in init.lua, so there is no FileExplorer augroup to hijack
+				disable_netrw = true,
+				hijack_netrw = false,
+			}
 		end,
 	},
 	{ "cdelledonne/vim-cmake" },
@@ -99,6 +103,21 @@ return {
 		},
 		cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
 	},
+	{"OmniSharp/omnisharp-vim"},
+	{
+		"f-person/auto-dark-mode.nvim",
+		opts = {
+			set_dark_mode = function()
+				vim.api.nvim_set_option_value("background", "dark", {})
+			end,
+			set_light_mode = function()
+				vim.api.nvim_set_option_value("background", "light", {})
+			end,
+			update_interval = 3000,
+			fallback = "dark"
+		}
+	},
+	{ "EdenEast/nightfox.nvim" },
 	{
 		"coder/claudecode.nvim",
 		dependencies = { "folke/snacks.nvim" },
@@ -142,5 +161,6 @@ return {
 			{ "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
 			{ "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
 		},
-	}
+	},
+	{ "skywind3000/asyncrun.vim" }
 }

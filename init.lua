@@ -40,6 +40,10 @@ P.S. You can delete this when you're done too. It's your config now :)
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
+
+-- nvim-tree replaces netrw; disable it before any plugin loads (see `:help nvim-tree-netrw`)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 vim.g.maplocalleader = ' '
 
 -- Install package manager
@@ -142,17 +146,12 @@ require('lazy').setup({
 
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
+    build = ':TSUpdate',
     dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
+      { 'nvim-treesitter/nvim-treesitter-textobjects', branch = 'main' },
     },
-    run = ':TSUpdate',
-    config = function()
-      pcall(require('nvim-treesitter.install').update { with_sync = true })
-      require("nvim-treesitter.configs").setup({
-            ensure_installed = { "markdown", "markdown_inline", "r", "rnoweb", "yaml", "latex", "csv" },
-            highlight = { enable = true },
-        })
-    end,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -294,73 +293,79 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>r', require('telescope.builtin').resume, { desc = '[R]esume Search' })
+vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
 -- [[ Configure Treesitter ]]
--- See `:help nvim-treesitter`
-require('nvim-treesitter.configs').setup {
-  -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+-- See `:help nvim-treesitter` and `:help treesitter`
+-- Add languages to be installed here that you want installed for treesitter (no-op if already installed)
+require('nvim-treesitter').install {
+  'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'javascript', 'html', 'hlsl', 'vimdoc', 'vim',
+}
 
-  -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function(args)
+    -- Highlighting (fails silently when there is no parser for the filetype)
+    if not pcall(vim.treesitter.start, args.buf) then
+      return
+    end
+    -- Indentation (experimental)
+    local lang = vim.treesitter.language.get_lang(args.match)
+    if args.match ~= 'python' and lang and vim.treesitter.query.get(lang, 'indents') then
+      vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})
 
-  highlight = { enable = true },
-  indent = { enable = true, disable = { 'python' } },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = '<c-space>',
-      node_incremental = '<c-space>',
-      scope_incremental = '<c-s>',
-      node_decremental = '<M-space>',
-    },
+-- Incremental selection: built into nvim 0.12 as `an` (parent node) / `in` (child node) in visual mode
+vim.keymap.set('n', '<c-space>', 'van', { remap = true, desc = 'Start treesitter node selection' })
+vim.keymap.set('x', '<c-space>', 'an', { remap = true, desc = 'Expand selection to parent node' })
+vim.keymap.set('x', '<M-space>', 'in', { remap = true, desc = 'Shrink selection to child node' })
+
+-- [[ Configure Treesitter textobjects ]] (main branch API)
+require('nvim-treesitter-textobjects').setup {
+  select = {
+    lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
   },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ['aa'] = '@parameter.outer',
-        ['ia'] = '@parameter.inner',
-        ['af'] = '@function.outer',
-        ['if'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['ic'] = '@class.inner',
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        [']m'] = '@function.outer',
-        [']]'] = '@class.outer',
-      },
-      goto_next_end = {
-        [']M'] = '@function.outer',
-        [']['] = '@class.outer',
-      },
-      goto_previous_start = {
-        ['[m'] = '@function.outer',
-        ['[['] = '@class.outer',
-      },
-      goto_previous_end = {
-        ['[M'] = '@function.outer',
-        ['[]'] = '@class.outer',
-      },
-    },
-    swap = {
-      enable = true,
-      swap_next = {
-        ['<leader>a'] = '@parameter.inner',
-      },
-      swap_previous = {
-        ['<leader>A'] = '@parameter.inner',
-      },
-    },
+  move = {
+    set_jumps = true, -- whether to set jumps in the jumplist
   },
 }
+
+do
+  local select = require('nvim-treesitter-textobjects.select')
+  local move = require('nvim-treesitter-textobjects.move')
+  local swap = require('nvim-treesitter-textobjects.swap')
+
+  -- You can use the capture groups defined in textobjects.scm
+  for keys, query in pairs {
+    ['aa'] = '@parameter.outer',
+    ['ia'] = '@parameter.inner',
+    ['af'] = '@function.outer',
+    ['if'] = '@function.inner',
+    ['ac'] = '@class.outer',
+    ['ic'] = '@class.inner',
+  } do
+    vim.keymap.set({ 'x', 'o' }, keys, function()
+      select.select_textobject(query, 'textobjects')
+    end, { desc = 'Select textobject ' .. query })
+  end
+
+  for fn, maps in pairs {
+    goto_next_start = { [']m'] = '@function.outer', [']]'] = '@class.outer' },
+    goto_next_end = { [']M'] = '@function.outer', [']['] = '@class.outer' },
+    goto_previous_start = { ['[m'] = '@function.outer', ['[['] = '@class.outer' },
+    goto_previous_end = { ['[M'] = '@function.outer', ['[]'] = '@class.outer' },
+  } do
+    for keys, query in pairs(maps) do
+      vim.keymap.set({ 'n', 'x', 'o' }, keys, function()
+        move[fn](query, 'textobjects')
+      end, { desc = fn .. ' ' .. query })
+    end
+  end
+
+  vim.keymap.set('n', '<leader>a', function() swap.swap_next('@parameter.inner') end, { desc = 'Swap next parameter' })
+  vim.keymap.set('n', '<leader>A', function() swap.swap_previous('@parameter.inner') end, { desc = 'Swap previous parameter' })
+end
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
@@ -375,6 +380,10 @@ require('plugins/coc_setup')
 vim.cmd("autocmd BufNewFile,BufRead *.fh :set ft=glsl")
 vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
 vim.cmd("autocmd FileType scheme map <buffer> <F9> :w<CR>:exec '!racket %'<CR>")
+vim.cmd("autocmd BufNewFile,BufRead *.fs :set ft=glsl")
+vim.cmd("autocmd BufNewFile,BufRead *.vs :set ft=glsl")
+vim.cmd("autocmd BufNewFile,BufRead *.hlsl :set ft=hlsl")
+
 
 vim.cmd("autocmd BufNewFile,BufRead *.pl :set ft=prolog")
 vim.cmd("autocmd BufNewFile,BufRead *.cm :set ft=cm")
@@ -401,7 +410,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "cpp",
   callback = function()
-    local cmd = "g++ \"%\" -Wall -Wextra -std=c++20 -fsanitize=address -g"
+    local cmd = "clang++ \"%\" -Wall -Wextra -std=c++20 -fsanitize=address,undefined -g"
     vim.keymap.set('n', '<F5>', function()
       open_my_terminal("echo compiling && "..cmd.." && echo running && ./a.out")
     end, { desc = "compile and run file" })
@@ -414,6 +423,10 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set('n', '<F6>', function()
       open_my_terminal("make > /dev/null && ./a.out")
     end, {desc="make"})
+
+    --vim.opt.makeprg = "cmake --build build -j8"
+    vim.keymap.set("n", "<F4>", ":AsyncRun cmake --build build -j8<CR>", { silent = true })
+    vim.keymap.set("n", "<leader>q", ":copen<CR>")
   end
 })
 
