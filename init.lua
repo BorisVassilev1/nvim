@@ -105,7 +105,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = true,
-        theme = 'catppuccin',
+        theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
@@ -377,6 +377,7 @@ vim.cmd("autocmd BufNewFile,BufRead *.fx :set ft=glsl")
 vim.cmd("autocmd FileType scheme map <buffer> <F9> :w<CR>:exec '!racket %'<CR>")
 
 vim.cmd("autocmd BufNewFile,BufRead *.pl :set ft=prolog")
+vim.cmd("autocmd BufNewFile,BufRead *.cm :set ft=cm")
 
 local function open_my_terminal(cmd)
   vim.api.nvim_command("below split")
@@ -464,6 +465,18 @@ vim.api.nvim_create_autocmd("FileType", {
     end, { desc = "run Python file" })
   end
 })
+
+local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+parser_config.cm = {
+  install_info = {
+    url = "~/Documents/tree-sitter-cm",
+    files = { "src/parser.c" },
+    generate_reqires_npm = false,
+    requires_generate_from_grammar = false,
+  },
+  filetype = "cm",
+  used_by = { "cm" },
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
