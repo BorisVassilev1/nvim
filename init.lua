@@ -371,7 +371,8 @@ end
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+--vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+vim.keymap.set('n', '<leader>q', ":copen<CR>", { desc = "Open diagnostics list" })
 
 require('plugins/coc_setup')
 
@@ -425,7 +426,7 @@ vim.api.nvim_create_autocmd("FileType", {
     end, {desc="make"})
 
     --vim.opt.makeprg = "cmake --build build -j8"
-    vim.keymap.set("n", "<F4>", ":AsyncRun cmake --build build -j8<CR>", { silent = true })
+    vim.keymap.set("n", "<F4>", ":AsyncRun -save=2 cmake --build build -j8<CR>", { silent = true, desc="build project with cmake" });
     vim.keymap.set("n", "<leader>q", ":copen<CR>")
   end
 })
